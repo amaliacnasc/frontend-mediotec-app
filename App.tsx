@@ -9,7 +9,7 @@ import NotificationM from './screens/NotificationM/NotificationM';
 import Login from './screens/LoginM/Login';
 import MyCourses from './screens/Courses/MyCourses';
 import MyProfile from './screens/Profile/MyProfile';
-import Conceitos from './screens/Conceitos/Conceito';
+
 
 // Tipagem para as props do TabNavigator
 type TabNavigatorProps = {
@@ -49,7 +49,7 @@ function TabNavigator() {
       }}
     >
       <Tab.Screen name="Home" component={() => null} />
-      <Tab.Screen name="Conceitos" component={Conceitos} />
+ 
       <Tab.Screen name="Disciplinas" component={MyCourses} />
       <Tab.Screen name="Notificações" component={NotificationM} />
       <Tab.Screen name="Login" component={Login} />

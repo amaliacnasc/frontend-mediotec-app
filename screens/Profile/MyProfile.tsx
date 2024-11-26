@@ -39,7 +39,7 @@ export default function MyProfile() {
 
       // Supondo que a resposta tenha os campos name, email, turma (className) e avatarUrl
       setUserData({
-        name: user.name,
+        name: user.userName,
         email: user.email,
         className: user.className,
         avatarUrl: user.avatarUrl || '', // Caso o avatar esteja em URL, senão utilize a imagem padrão
@@ -93,7 +93,7 @@ export default function MyProfile() {
         />
         <Text style={styles.nameText}>{userData.name || 'Nome não disponível'}</Text>
         <Text style={styles.emailText}>{userData.email || 'Email não disponível'}</Text>
-        <Text style={styles.emailText}>{userData.className || 'Turma não disponível'}</Text>
+   
         <View style={styles.buttonContainer}>
           <Button icon="calendar-month" mode="contained" buttonColor="#7326BF" style={styles.button}>
             Horários
@@ -101,16 +101,16 @@ export default function MyProfile() {
           <Button icon="credit-card-outline" mode="contained" buttonColor="#7326BF" style={styles.button}>
             Pagamentos
           </Button>
+          <Button mode="contained" buttonColor='#7326BF' style={styles.button}>Contatos</Button>
         </View>
       </View>
     </ScrollView>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F9F9F9', // Fundo claro e agradável
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
@@ -118,43 +118,59 @@ const styles = StyleSheet.create({
   profileContainer: {
     alignItems: 'center',
     width: '100%',
-    marginTop: 50, // ajuste para dar espaço para o ícone
+    marginTop: 20,
+    paddingBottom: 30,
+    backgroundColor: '#FFFFFF', // Fundo branco para destaque
+    borderRadius: 10,
+    elevation: 5, // Sombra para realce
+    padding: 20,
   },
   avatar: {
     alignSelf: 'center',
     marginBottom: 20,
+    borderWidth: 2,
+    borderColor: '#7326BF', // Borda roxa para destaque
   },
   nameText: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 22,
+    fontWeight: '600',
     textAlign: 'center',
     marginBottom: 8,
+    color: '#333333', // Cor de texto sutil e moderna
   },
   emailText: {
     fontSize: 14,
     textAlign: 'center',
-    color: '#666',
+    color: '#888888',
     marginBottom: 20,
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: 400,
+    flexDirection: 'column', // Botões em coluna
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
     paddingHorizontal: 20,
+    marginTop: 20,
   },
   button: {
-    flex: 1,
-    marginHorizontal: 5,
+    width: '90%',
+    marginVertical: 10,
+    borderRadius: 20,
+    paddingVertical: 10,
+    marginTop:5,
   },
   iconSettings: {
     position: 'absolute',
-    top: 10,
-    right: 10,
+    top: 20,
+    right: 20,
     zIndex: 1,
+    backgroundColor: '#F2F2F2',
+    borderRadius: 30,
+    elevation: 5, // Sombra para o ícone
   },
   error: {
     fontSize: 16,
-    color: 'red',
+    color: '#FF3B30', // Cor vermelha marcante para erros
     textAlign: 'center',
   },
 });

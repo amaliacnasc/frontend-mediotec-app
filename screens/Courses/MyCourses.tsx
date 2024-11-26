@@ -7,145 +7,127 @@ import {
   Alert,
   TouchableOpacity,
   StyleSheet,
+  Modal,
+  Pressable,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
-export default function MyCourses() {
-  const [courses, setCourses] = useState<any[]>([]); // Estado para armazenar as disciplinas
-  const [loading, setLoading] = useState<boolean>(true); // Estado para controlar o carregamento
-  const [error, setError] = useState<string | null>(null); // Estado para controlar erros
-  const [concepts, setConcepts] = useState<any[]>([]); // Estado para os conceitos
-  const [showConcepts, setShowConcepts] = useState<boolean>(false); // Estado para alternar entre detalhes e conceitos
+// Interfaces para tipagem
+interface Course {
+  courseId: string;
+  user_class_courseId: string;
+  details: {
+    courseName: string;
+    description: string;
+    workload: number;
+  };
+  concept: Concept | null;
+}
 
-  const fetchUserClass = async () => {
+interface Concept {
+  conceitoId: string;
+  conceito: string;
+  unidade: string;
+  result: string;
+}
+
+export default function MyCourses() {
+  const [courses, setCourses] = useState<Course[]>([]); // Armazena disciplinas
+  const [loading, setLoading] = useState<boolean>(true); // Controla carregamento
+  const [error, setError] = useState<string | null>(null); // Armazena mensagens de erro
+  const [concepts, setConcepts] = useState<Concept[]>([]); // Armazena conceitos
+  const [modalMessage, setModalMessage] = useState<string>(''); // Mensagem do modal
+  const [modalVisible, setModalVisible] = useState<boolean>(false); // Controla exibição do modal
+
+  // Função para buscar disciplinas da turma do usuário
+  const fetchCoursesAndConcepts = async () => {
     try {
       const token = await AsyncStorage.getItem('@user_token');
       const userId = await AsyncStorage.getItem('@user_id');
+
       if (!token || !userId) {
         Alert.alert('Erro', 'Usuário não autenticado ou ID ausente.');
         setLoading(false);
-        return null;
+        return;
       }
 
-      const response = await axios.get(
+      // Busca a turma associada ao usuário
+      const turmaResponse = await axios.get<{ classId: string }[]>(
         `https://api-mediotec-v2-teste.onrender.com/mediotec/relacionamento/user/${userId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      if (response.data.length === 0) {
+      const classId = turmaResponse.data[0]?.classId;
+
+      if (!classId) {
         Alert.alert('Erro', 'Usuário não está associado a nenhuma turma.');
-        setLoading(false);
-        return null;
-      }
-
-      return response.data[0]?.classId;
-    } catch (error) {
-      console.error('Erro ao buscar turma do usuário:', error);
-      setError('Erro ao carregar a turma do usuário. Verifique sua conexão.');
-      return null;
-    }
-  };
-
-  const fetchClassCourses = async (classId: string) => {
-    try {
-      const token = await AsyncStorage.getItem('@user_token');
-      if (!token) {
-        Alert.alert('Erro', 'Usuário não autenticado.');
         setLoading(false);
         return;
       }
 
-      const response = await axios.get(
+      // Busca todas as disciplinas da turma
+      const coursesResponse = await axios.get<{ courseId: string; user_class_courseId: string }[]>(
         `https://api-mediotec-v2-teste.onrender.com/mediotec/turmas/classCourse/${classId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      const coursesWithDetails = await Promise.all(
-        response.data.map(async (course: any) => {
-          const courseDetailsResponse = await axios.get(
+      const allCourses = await Promise.all(
+        coursesResponse.data.map(async (course) => {
+          const courseDetailsResponse = await axios.get<{
+            courseName: string;
+            description: string;
+            workload: number;
+          }>(
             `https://api-mediotec-v2-teste.onrender.com/mediotec/disciplinas/id/${course.courseId}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
+            { headers: { Authorization: `Bearer ${token}` } }
           );
-
-          return { ...course, details: courseDetailsResponse.data, showDetails: false }; // Incluindo showDetails
+          return { ...course, details: courseDetailsResponse.data };
         })
       );
 
-      setCourses(coursesWithDetails);
-    } catch (error) {
-      console.error('Erro ao buscar disciplinas:', error);
-      setError('Erro ao carregar as disciplinas. Verifique sua conexão.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchConcepts = async (courseId: string) => {
-    try {
-      setLoading(true);
-      const token = await AsyncStorage.getItem('@user_token');
-      const userId = await AsyncStorage.getItem('@user_id');
-      if (!token || !userId) {
-        Alert.alert('Erro', 'Usuário não autenticado.');
-        setLoading(false);
-        return;
-      }
-
-      const response = await axios.get(
+      // Busca os conceitos do usuário
+      const conceptsResponse = await axios.get<Concept[]>(
         `https://api-mediotec-v2-teste.onrender.com/mediotec/conceitos/user/${userId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      const filteredConcepts = response.data.filter(
-        (concept: any) => concept.user_class_courseId === courseId
-      );
+      const userConcepts = conceptsResponse.data;
 
-      setConcepts(filteredConcepts);
-      setShowConcepts(true);
+      // Combina disciplinas da turma com conceitos (se houver)
+      const coursesWithConcepts: Course[] = allCourses.map((course) => {
+        const concept = userConcepts.find(
+          (c) => c.conceitoId === course.user_class_courseId
+        );
+        return {
+          ...course,
+          concept: concept || null, // Adiciona o conceito, ou null se não tiver
+        };
+      });
+
+      setCourses(coursesWithConcepts);
     } catch (error) {
-      console.error('Erro ao buscar conceitos:', error);
-      Alert.alert('Erro', 'Erro ao carregar os conceitos.');
+      console.error('Erro ao buscar dados:', error);
+      setError('Erro ao carregar as disciplinas e conceitos.');
     } finally {
       setLoading(false);
     }
   };
 
-  const toggleCourseDetails = (courseId: string) => {
-    setCourses((prevCourses) =>
-      prevCourses.map((course) =>
-        course.courseId === courseId
-          ? { ...course, showDetails: !course.showDetails }
-          : course
-      )
-    );
+  // Abre o modal para exibir os conceitos de uma disciplina
+  const openConceptsModal = (concept: Concept | null) => {
+    if (concept) {
+      setConcepts([concept]);
+      setModalMessage('');
+    } else {
+      setConcepts([]);
+      setModalMessage('Essa disciplina ainda não teve seus conceitos cadastrados.');
+    }
+    setModalVisible(true);
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      const classId = await fetchUserClass();
-      if (classId) {
-        await fetchClassCourses(classId);
-      }
-    };
-
-    fetchData();
+    fetchCoursesAndConcepts();
   }, []);
 
   if (loading) {
@@ -164,63 +146,62 @@ export default function MyCourses() {
     );
   }
 
-  if (showConcepts) {
-    return (
-      <View style={styles.container}>
-        <FlatList
-          data={concepts}
-          keyExtractor={(item) => item.conceitoId}
-          renderItem={({ item }) => (
-            <View style={styles.conceptItem}>
-              <Text style={styles.conceptText}>Conceito: {item.conceito}</Text>
-              <Text style={styles.conceptText}>Unidade: {item.unidade}</Text>
-              <Text style={styles.conceptText}>Resultado: {item.result}</Text>
-            </View>
-          )}
-        />
-        <TouchableOpacity onPress={() => setShowConcepts(false)} style={styles.backButton}>
-          <Text style={styles.backButtonText}>Voltar</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
       <FlatList
         data={courses}
-        keyExtractor={(item) => String(item.courseId)}
+        keyExtractor={(item) => item.details.courseId}
         renderItem={({ item }) => (
           <View style={styles.courseItem}>
-            <Text style={styles.courseTitle}>{item.details?.courseName || 'Carregando...'}</Text>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={styles.detailsButton}
-                onPress={() => toggleCourseDetails(item.courseId)}
-              >
-                <Text style={styles.buttonText}>
-                  {item.showDetails ? 'Esconder Detalhes' : 'Detalhes'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.conceptButton}
-                onPress={() => fetchConcepts(item.courseId)}
-              >
-                <Text style={styles.buttonText}>Conceitos</Text>
-              </TouchableOpacity>
-            </View>
-
-            {item.showDetails && (
-              <View style={styles.detailsContainer}>
-                <Text style={styles.detailsText}>Descrição: {item.details?.description}</Text>
-                <Text style={styles.detailsText}>
-                  Carga Horária: {item.details?.workload} horas
-                </Text>
-              </View>
-            )}
+            <Text style={styles.courseTitle}>{item.details.courseName}</Text>
+            <Text style={styles.detailsText}>Descrição: {item.details.description}</Text>
+            <Text style={styles.detailsText}>
+              Carga Horária: {item.details.workload} horas
+            </Text>
+            <TouchableOpacity
+              style={styles.conceptButton}
+              onPress={() => openConceptsModal(item.concept)}
+            >
+              <Text style={styles.buttonText}>Ver Conceitos</Text>
+            </TouchableOpacity>
           </View>
         )}
       />
+
+      {/* Modal para exibição de conceitos */}
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Conceitos</Text>
+            {modalMessage ? (
+              <Text style={styles.modalMessage}>{modalMessage}</Text>
+            ) : (
+              <FlatList
+                data={concepts}
+                keyExtractor={(item) => item.conceitoId}
+                renderItem={({ item }) => (
+                  <View style={styles.conceptItem}>
+                    <Text style={styles.conceptText}>Conceito: {item.conceito}</Text>
+                    <Text style={styles.conceptText}>Unidade: {item.unidade}</Text>
+                    <Text style={styles.conceptText}>Resultado: {item.result}</Text>
+                  </View>
+                )}
+              />
+            )}
+            <Pressable
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>Fechar</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -242,43 +223,65 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#673AB7',
   },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  detailsButton: {
-    backgroundColor: '#D1C4E9',
-    padding: 10,
-    borderRadius: 8,
+  detailsText: {
+    fontSize: 14,
+    color: '#333',
+    marginBottom: 5,
   },
   conceptButton: {
     backgroundColor: '#B39DDB',
     padding: 10,
     borderRadius: 8,
+    marginTop: 10,
   },
   buttonText: {
     color: '#FFFFFF',
     fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    width: '90%',
+    backgroundColor: '#FFFFFF',
+    padding: 20,
+    borderRadius: 10,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#673AB7',
+    textAlign: 'center',
+  },
+  modalMessage: {
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'center',
+    marginTop: 20,
   },
   conceptItem: {
-    marginBottom: 12,
-    padding: 16,
+    padding: 10,
     backgroundColor: '#F3E5F5',
     borderRadius: 8,
+    marginBottom: 10,
   },
   conceptText: {
     fontSize: 16,
     color: '#5E35B1',
   },
-  backButton: {
+  closeButton: {
     marginTop: 20,
-    alignSelf: 'center',
-    padding: 10,
     backgroundColor: '#673AB7',
+    padding: 10,
     borderRadius: 8,
+    alignItems: 'center',
   },
-  backButtonText: {
+  closeButtonText: {
     color: '#FFFFFF',
     fontWeight: 'bold',
   },
@@ -287,10 +290,4 @@ const styles = StyleSheet.create({
     color: '#FF0000',
     textAlign: 'center',
   },
-  detailsContainer:{
-
-  }, 
-  detailsText:{
-    
-  }
 });
