@@ -6,6 +6,7 @@ import { Provider as PaperProvider } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { StyleSheet } from 'react-native';
 import NotificationM from './screens/NotificationM/NotificationM';
+import HomeM from './screens/HomeM/HomeM';// Adicionado
 import Login from './screens/LoginM/Login';
 import MyCourses from './screens/Courses/MyCourses';
 import MyProfile from './screens/Profile/MyProfile';
@@ -40,17 +41,43 @@ function TabNavigator() {
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name={iconName} size={size} color={color} />
           ),
-          tabBarActiveTintColor: 'tomato',
+          tabBarActiveTintColor: 'white',
           tabBarInactiveTintColor: 'gray',
           tabBarStyle: styles.tabBar, // Aplica o estilo de fundo
         };
       }}
     >
-      <Tab.Screen name="Home" component={() => null} />
-      <Tab.Screen name="Disciplinas" component={MyCourses} />
-      <Tab.Screen name="Notificações" component={NotificationM} />
-  
-      <Tab.Screen name="Perfil" component={MyProfile} />
+      {/* Tela inicial com "Últimos Avisos" */}
+      <Tab.Screen
+        name="Home"
+        component={HomeM} // Usando LatestNotifications
+        options={{
+          headerTitle: 'Últimos Avisos', // Título no cabeçalho
+          headerStyle: { backgroundColor: '#7326BF' }, // Estilo do cabeçalho
+          headerTintColor: '#FFFFFF', // Cor do texto no cabeçalho
+        }}
+      />
+      <Tab.Screen
+        name="Disciplinas"
+        component={MyCourses}
+        options={{
+          headerTitle: 'Minhas Disciplinas',
+        }}
+      />
+      <Tab.Screen
+        name="Notificações"
+        component={NotificationM}
+        options={{
+          headerTitle: 'Todas as Notificações',
+        }}
+      />
+      <Tab.Screen
+        name="Perfil"
+        component={MyProfile}
+        options={{
+          headerTitle: 'Meu Perfil',
+        }}
+      />
     </Tab.Navigator>
   );
 }
@@ -60,21 +87,34 @@ export default function App() {
     <PaperProvider>
       <NavigationContainer>
         <Stack.Navigator initialRouteName="Login">
+          {/* Tela de Login */}
           <Stack.Screen
             name="Login"
             component={Login}
             options={{ headerShown: false }} // Oculta o cabeçalho na tela de login
           />
+               <Stack.Screen
+            name="NotificationM"
+            component={NotificationM}
+            options={{
+              headerTitle: 'Notificações',
+              headerStyle: { backgroundColor: '#7326BF' },
+              headerTintColor: '#FFFFFF',
+            }}
+          />
+          {/* Abas principais */}
           <Stack.Screen
             name="Tabs"
             component={TabNavigator}
             options={{ headerShown: false }}
           />
+          {/* Tela de Pagamentos */}
           <Stack.Screen
             name="PaymentsScreen"
             component={Payments}
             options={{ title: 'Pagamentos', headerShown: true }}
           />
+          {/* Tela de Horários */}
           <Stack.Screen
             name="Timetable"
             component={Timetable}

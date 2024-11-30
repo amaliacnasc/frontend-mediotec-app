@@ -93,24 +93,24 @@ export default function MyProfile() {
         <Text style={styles.emailText}>{userData.email || 'Email não disponível'}</Text>
 
         <View style={styles.buttonContainer}>
-        <Button
-  icon="calendar-month"
-  mode="contained"
-  buttonColor="#7326BF"
-  style={styles.button}
-  onPress={() => navigation.navigate('Timetable')} // Nome registrado no Stack Navigator
->
-  Horários
-</Button>
           <Button
-  icon="credit-card-outline"
-  mode="contained"
-  buttonColor="#7326BF"
-  style={styles.button}
-  onPress={() => navigation.navigate('PaymentsScreen')} // Nome correto
->
-  Pagamentos
-</Button>
+            icon="calendar-month"
+            mode="contained"
+            buttonColor="#7326BF"
+            style={styles.button}
+            onPress={() => navigation.navigate('Timetable')} // Nome registrado no Stack Navigator
+          >
+            Horários
+          </Button>
+          <Button
+            icon="credit-card-outline"
+            mode="contained"
+            buttonColor="#7326BF"
+            style={styles.button}
+            onPress={() => navigation.navigate('PaymentsScreen')} // Nome correto
+          >
+            Pagamentos
+          </Button>
 
           <Button mode="contained" buttonColor="#7326BF" style={styles.button}>
             Contatos

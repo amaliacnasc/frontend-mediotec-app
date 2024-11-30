@@ -13,7 +13,6 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
-// Interfaces para tipagem
 interface Course {
   courseId: string;
   user_class_courseId: string;
@@ -22,7 +21,7 @@ interface Course {
     description: string;
     workload: number;
   };
-  concept: Concept | null;
+  concept: Concept[]; // Alterado para um array de conceitos
 }
 
 interface Concept {
@@ -30,17 +29,19 @@ interface Concept {
   conceito: string;
   unidade: string;
   result: string;
+  user_class_courseId: string;
 }
 
 export default function MyCourses() {
-  const [courses, setCourses] = useState<Course[]>([]); // Armazena disciplinas
-  const [loading, setLoading] = useState<boolean>(true); // Controla carregamento
-  const [error, setError] = useState<string | null>(null); // Armazena mensagens de erro
-  const [concepts, setConcepts] = useState<Concept[]>([]); // Armazena conceitos
-  const [modalMessage, setModalMessage] = useState<string>(''); // Mensagem do modal
-  const [modalVisible, setModalVisible] = useState<boolean>(false); // Controla exibição do modal
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [concepts, setConcepts] = useState<Concept[]>([]);
+  const [modalMessage, setModalMessage] = useState<string>('');
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [className, setClassName] = useState<string>(''); // Estado para o nome da turma
 
-  // Função para buscar disciplinas da turma do usuário
+  // Função para buscar disciplinas e conceitos
   const fetchCoursesAndConcepts = async () => {
     try {
       const token = await AsyncStorage.getItem('@user_token');
@@ -53,22 +54,22 @@ export default function MyCourses() {
       }
 
       // Busca a turma associada ao usuário
-      const turmaResponse = await axios.get<{ classId: string }[]>(
+      const turmaResponse = await axios.get<{ classId: string; className: string }[]>(
         `https://api-mediotec-v2-teste.onrender.com/mediotec/relacionamento/user/${userId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      const classId = turmaResponse.data[0]?.classId;
-
-      if (!classId) {
+      const turma = turmaResponse.data[0];
+      if (!turma) {
         Alert.alert('Erro', 'Usuário não está associado a nenhuma turma.');
         setLoading(false);
         return;
       }
 
-      // Busca todas as disciplinas da turma
+      setClassName(turma.className); // Define o nome da turma no estado
+
       const coursesResponse = await axios.get<{ courseId: string; user_class_courseId: string }[]>(
-        `https://api-mediotec-v2-teste.onrender.com/mediotec/turmas/classCourse/${classId}`,
+        `https://api-mediotec-v2-teste.onrender.com/mediotec/turmas/classCourse/${turma.classId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -86,7 +87,6 @@ export default function MyCourses() {
         })
       );
 
-      // Busca os conceitos do usuário
       const conceptsResponse = await axios.get<Concept[]>(
         `https://api-mediotec-v2-teste.onrender.com/mediotec/conceitos/user/${userId}`,
         { headers: { Authorization: `Bearer ${token}` } }
@@ -94,14 +94,13 @@ export default function MyCourses() {
 
       const userConcepts = conceptsResponse.data;
 
-      // Combina disciplinas da turma com conceitos (se houver)
       const coursesWithConcepts: Course[] = allCourses.map((course) => {
-        const concept = userConcepts.find(
-          (c) => c.conceitoId === course.user_class_courseId
+        const associatedConcepts = userConcepts.filter(
+          (c) => c.user_class_courseId === course.user_class_courseId
         );
         return {
           ...course,
-          concept: concept || null, // Adiciona o conceito, ou null se não tiver
+          concept: associatedConcepts, // Armazena todos os conceitos associados à disciplina
         };
       });
 
@@ -115,9 +114,9 @@ export default function MyCourses() {
   };
 
   // Abre o modal para exibir os conceitos de uma disciplina
-  const openConceptsModal = (concept: Concept | null) => {
-    if (concept) {
-      setConcepts([concept]);
+  const openConceptsModal = (concepts: Concept[]) => {
+    if (concepts.length > 0) {
+      setConcepts(concepts);
       setModalMessage('');
     } else {
       setConcepts([]);
@@ -126,21 +125,28 @@ export default function MyCourses() {
     setModalVisible(true);
   };
 
+  // Função para traduzir unidade e resultado
+  const translateConcept = (concept: Concept) => ({
+    ...concept,
+    unidade: concept.unidade === 'UNIT1' ? 'Unidade 1' : concept.unidade,
+    result: concept.result === 'APPROVED' ? 'Aprovado' : 'Reprovado',
+  });
+
   useEffect(() => {
     fetchCoursesAndConcepts();
   }, []);
 
   if (loading) {
     return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color="#9747FF" />
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="#673AB7" />
       </View>
     );
   }
 
   if (error) {
     return (
-      <View style={styles.container}>
+      <View style={styles.center}>
         <Text style={styles.error}>{error}</Text>
       </View>
     );
@@ -148,9 +154,12 @@ export default function MyCourses() {
 
   return (
     <View style={styles.container}>
+      {/* Mostra o nome da turma */}
+      <Text style={styles.className}>Turma: {className}</Text>
+
       <FlatList
         data={courses}
-        keyExtractor={(item) => item.details.courseId}
+        keyExtractor={(item) => item.user_class_courseId}
         renderItem={({ item }) => (
           <View style={styles.courseItem}>
             <Text style={styles.courseTitle}>{item.details.courseName}</Text>
@@ -182,7 +191,7 @@ export default function MyCourses() {
               <Text style={styles.modalMessage}>{modalMessage}</Text>
             ) : (
               <FlatList
-                data={concepts}
+                data={concepts.map(translateConcept)}
                 keyExtractor={(item) => item.conceitoId}
                 renderItem={({ item }) => (
                   <View style={styles.conceptItem}>
@@ -207,87 +216,21 @@ export default function MyCourses() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#FFFFFF',
-  },
-  courseItem: {
-    backgroundColor: '#EDE7F6',
-    padding: 16,
-    marginBottom: 12,
-    borderRadius: 8,
-  },
-  courseTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#673AB7',
-  },
-  detailsText: {
-    fontSize: 14,
-    color: '#333',
-    marginBottom: 5,
-  },
-  conceptButton: {
-    backgroundColor: '#B39DDB',
-    padding: 10,
-    borderRadius: 8,
-    marginTop: 10,
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  modalContent: {
-    width: '90%',
-    backgroundColor: '#FFFFFF',
-    padding: 20,
-    borderRadius: 10,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#673AB7',
-    textAlign: 'center',
-  },
-  modalMessage: {
-    fontSize: 16,
-    color: '#333',
-    textAlign: 'center',
-    marginTop: 20,
-  },
-  conceptItem: {
-    padding: 10,
-    backgroundColor: '#F3E5F5',
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  conceptText: {
-    fontSize: 16,
-    color: '#5E35B1',
-  },
-  closeButton: {
-    marginTop: 20,
-    backgroundColor: '#673AB7',
-    padding: 10,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  closeButtonText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-  },
-  error: {
-    fontSize: 16,
-    color: '#FF0000',
-    textAlign: 'center',
-  },
+  container: { flex: 1, backgroundColor: '#FFF', padding: 16 },
+  className: { fontSize: 18, fontWeight: 'bold', marginBottom: 16, color: '#333' },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  courseItem: { backgroundColor: '#EDE7F6', padding: 16, borderRadius: 8, marginBottom: 12 },
+  courseTitle: { fontSize: 18, fontWeight: 'bold', color: '#673AB7' },
+  detailsText: { fontSize: 14, color: '#333' },
+  conceptButton: { backgroundColor: '#B39DDB', padding: 10, borderRadius: 8, marginTop: 10 },
+  buttonText: { color: '#FFF', textAlign: 'center' },
+  modalContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
+  modalContent: { width: '90%', backgroundColor: '#FFF', padding: 16, borderRadius: 8 },
+  modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10, color: '#673AB7' },
+  modalMessage: { textAlign: 'center', fontSize: 14, color: '#333', marginVertical: 10 },
+  conceptItem: { backgroundColor: '#F3E5F5', padding: 10, borderRadius: 8, marginBottom: 8 },
+  conceptText: { fontSize: 14, color: '#5E35B1' },
+  closeButton: { backgroundColor: '#673AB7', padding: 10, borderRadius: 8, alignItems: 'center' },
+  closeButtonText: { color: '#FFF', fontWeight: 'bold' },
+  error: { fontSize: 16, color: '#FF3B30' },
 });
