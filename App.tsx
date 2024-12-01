@@ -153,7 +153,7 @@ export default function App() {
             component={NotificationM}
             options={{
               headerTitle: "Notificações",
-              headerStyle: { backgroundColor: "#7326BF" },
+              headerStyle: { backgroundColor: "#9747FF" },
               headerTintColor: "#FFFFFF",
             }}
           />
@@ -184,9 +184,11 @@ export default function App() {
 // Estilos
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: "#FFFFFF", // Cor de fundo da tab
+    backgroundColor: "#FFFFFF",
+    height: 90,                
+    paddingTop: 18, 
   },
   tabBarIcon: {
-    color: "#FFFFFF", // Cor dos ícones
+    color: "#FFFFFF"
   },
 });
