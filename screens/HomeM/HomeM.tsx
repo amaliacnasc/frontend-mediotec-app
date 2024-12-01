@@ -105,8 +105,8 @@ export default function HomeM() {
 
   return (
     <View>
-      {/* Exibição do nome do usuário */}
-      <Text style={styles.welcomeText}>Bem-vindo, {userData.name || 'Usuário'}</Text>
+      {/*  
+      <Text style={styles.welcomeText}>Bem-vindo, {userData.name || 'Usuário'}</Text> */}
 
       <View style={styles.container}>
         <View style={styles.header}>
