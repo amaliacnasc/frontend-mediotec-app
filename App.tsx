@@ -14,6 +14,7 @@ import Login from "./screens/LoginM/Login";
 import MyCourses from "./screens/Courses/MyCourses";
 import MyProfile from "./screens/Profile/MyProfile";
 import Payments from "./screens/Payments/PaymentsScreen";
+import ContactInfo from "./screens/ContactInfo/ContactInfo";
 import Timetable from "./screens/timetable/Timetable";
 
 // Tipagem para as props do TabNavigator
@@ -70,14 +71,13 @@ function TabNavigator() {
           ),
           tabBarActiveTintColor: "#9747FF",
           tabBarInactiveTintColor: "#AEB3BE",
-          tabBarStyle: styles.tabBar, // Aplica o estilo de fundo
+          tabBarStyle: styles.tabBar,
         };
       }}
     >
-      {/* Tela inicial com "Últimos Avisos" */}
       <Tab.Screen
         name="Home"
-        component={HomeM} // Componente associado à página Home
+        component={HomeM}
         options={{
           headerTitle: () => (
             <View style={{ alignItems: "center" }}>
@@ -90,7 +90,6 @@ function TabNavigator() {
                   marginTop: 8,
                 }}
               />
-
               <Text
                 style={{
                   marginTop: 40,
@@ -98,41 +97,22 @@ function TabNavigator() {
                   color: "#FFF",
                 }}
               >
-                Bem-vindo (a), {userData.name || "Usuário"}
+                Bem-vindo(a), {userData.name || "Usuário"}
               </Text>
             </View>
           ),
           headerStyle: {
-            backgroundColor: "#9747FF", // Cor do header
+            backgroundColor: "#9747FF",
             height: 200,
             borderBottomRightRadius: 60,
             borderBottomLeftRadius: 60,
           },
-          headerTitleAlign: "center", // Alinha o título no centro
+          headerTitleAlign: "center",
         }}
       />
-
-      <Tab.Screen
-        name="Disciplinas"
-        component={MyCourses}
-        options={{
-          headerTitle: "Minhas Disciplinas",
-        }}
-      />
-      <Tab.Screen
-        name="Notificações"
-        component={NotificationM}
-        options={{
-          headerTitle: "Todas as Notificações",
-        }}
-      />
-      <Tab.Screen
-        name="Perfil"
-        component={MyProfile}
-        options={{
-          headerTitle: "Meu Perfil",
-        }}
-      />
+      <Tab.Screen name="Disciplinas" component={MyCourses} />
+      <Tab.Screen name="Notificações" component={NotificationM} />
+      <Tab.Screen name="Perfil" component={MyProfile} />
     </Tab.Navigator>
   );
 }
@@ -142,53 +122,22 @@ export default function App() {
     <PaperProvider>
       <NavigationContainer>
         <Stack.Navigator initialRouteName="Login">
-          {/* Tela de Login */}
-          <Stack.Screen
-            name="Login"
-            component={Login}
-            options={{ headerShown: false }} // Oculta o cabeçalho na tela de login
-          />
-          <Stack.Screen
-            name="NotificationM"
-            component={NotificationM}
-            options={{
-              headerTitle: "Notificações",
-              headerStyle: { backgroundColor: "#9747FF" },
-              headerTintColor: "#FFFFFF",
-            }}
-          />
-          {/* Abas principais */}
-          <Stack.Screen
-            name="Tabs"
-            component={TabNavigator}
-            options={{ headerShown: false }}
-          />
-          {/* Tela de Pagamentos */}
-          <Stack.Screen
-            name="PaymentsScreen"
-            component={Payments}
-            options={{ title: "Pagamentos", headerShown: true }}
-          />
-          {/* Tela de Horários */}
-          <Stack.Screen
-            name="Timetable"
-            component={Timetable}
-            options={{ title: "Horários", headerShown: true }}
-          />
+          <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
+          <Stack.Screen name="NotificationM" component={NotificationM} options={{ headerTitle: "Notificações" }} />
+          <Stack.Screen name="Tabs" component={TabNavigator} options={{ headerShown: false }} />
+          <Stack.Screen name="PaymentsScreen" component={Payments} options={{ title: "Pagamentos" }} />
+          <Stack.Screen name="Timetable" component={Timetable} options={{ title: "Horários" }} />
+          <Stack.Screen name="ContactInfo" component={ContactInfo} options={{ title: "Contatos" }} />
         </Stack.Navigator>
       </NavigationContainer>
     </PaperProvider>
   );
 }
 
-// Estilos
 const styles = StyleSheet.create({
   tabBar: {
     backgroundColor: "#FFFFFF",
-    height: 90,                
-    paddingTop: 18, 
-  },
-  tabBarIcon: {
-    color: "#FFFFFF"
+    height: 90,
+    paddingTop: 18,
   },
 });

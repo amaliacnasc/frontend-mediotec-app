@@ -117,13 +117,13 @@ export default function MyProfile() {
           >
             Pagamentos
           </Button>
-
           <Button
             icon="card-account-phone-outline"
             mode="contained"
             buttonColor="#EBE1F7"
             style={styles.button}
             labelStyle={styles.buttonLabel}
+            onPress={() => navigation.navigate("ContactInfo")}
           >
             Contatos
           </Button>
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
   buttonLabel: {
     color: "#7326BF",
     fontSize: 16,
-    justifyContent: "space-between"
+    justifyContent: "space-between",
   },
   iconSettings: {
     position: "absolute",
