@@ -10,7 +10,7 @@ import HomeM from './screens/HomeM/HomeM';// Adicionado
 import Login from './screens/LoginM/Login';
 import MyCourses from './screens/Courses/MyCourses';
 import MyProfile from './screens/Profile/MyProfile';
-import Payments from './screens/Payments/PaymentsScreen';
+import ContactInfo from './screens/ContactInfo/ContactInfo';
 import Timetable from './screens/timetable/Timetable';
 
 // Tipagem para as props do TabNavigator
@@ -108,17 +108,18 @@ export default function App() {
             component={TabNavigator}
             options={{ headerShown: false }}
           />
-          {/* Tela de Pagamentos */}
-          <Stack.Screen
-            name="PaymentsScreen"
-            component={Payments}
-            options={{ title: 'Pagamentos', headerShown: true }}
-          />
+         
           {/* Tela de Horários */}
           <Stack.Screen
             name="Timetable"
             component={Timetable}
             options={{ title: 'Horários', headerShown: true }}
+          />
+          {/* Tela de Horários */}
+          <Stack.Screen
+            name="ContactInfo"
+            component={ContactInfo}
+            options={{ title: 'ContactInfo', headerShown: true }}
           />
         </Stack.Navigator>
       </NavigationContainer>

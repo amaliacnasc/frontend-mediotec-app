@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, Text, View, StyleSheet, Alert } from 'react-native';
+import { ScrollView, Text, View, StyleSheet, Alert, Linking } from 'react-native';
 import { Avatar, Button, IconButton } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -75,7 +75,7 @@ export default function MyProfile() {
       <IconButton
         icon="cog"
         size={28}
-        onPress={() => { }}
+        onPress={() => {}}
         style={styles.iconSettings}
         iconColor="#7326BF"
       />
@@ -112,7 +112,12 @@ export default function MyProfile() {
             Pagamentos
           </Button>
 
-          <Button mode="contained" buttonColor="#7326BF" style={styles.button}>
+          <Button
+            mode="contained"
+            buttonColor="#7326BF"
+            style={styles.button}
+            onPress={() => navigation.navigate('ContactInfo')} // Redireciona para o componente de Contatos
+          >
             Contatos
           </Button>
         </View>
