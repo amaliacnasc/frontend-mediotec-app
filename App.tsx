@@ -13,7 +13,6 @@ import HomeM from "./screens/HomeM/HomeM"; // Adicionado
 import Login from "./screens/LoginM/Login";
 import MyCourses from "./screens/Courses/MyCourses";
 import MyProfile from "./screens/Profile/MyProfile";
-import Payments from "./screens/Payments/PaymentsScreen";
 import ContactInfo from "./screens/ContactInfo/ContactInfo";
 import Timetable from "./screens/timetable/Timetable";
 
@@ -125,7 +124,6 @@ export default function App() {
           <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
           <Stack.Screen name="NotificationM" component={NotificationM} options={{ headerTitle: "Notificações" }} />
           <Stack.Screen name="Tabs" component={TabNavigator} options={{ headerShown: false }} />
-          <Stack.Screen name="PaymentsScreen" component={Payments} options={{ title: "Pagamentos" }} />
           <Stack.Screen name="Timetable" component={Timetable} options={{ title: "Horários" }} />
           <Stack.Screen name="ContactInfo" component={ContactInfo} options={{ title: "Contatos" }} />
         </Stack.Navigator>

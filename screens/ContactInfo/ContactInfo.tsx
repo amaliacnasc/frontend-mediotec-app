@@ -21,18 +21,13 @@ const ContactInfo: React.FC<ContactInfoProps> = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <IconButton
-          icon="arrow-left"
-          size={28}
-          onPress={() => {}}
-          style={styles.iconBack}
-          iconColor="#7326BF"
-        />
+       
         <Text style={styles.title}>Contatos</Text>
       </View>
 
       <View style={styles.contactContainer}>
-        <Text style={styles.contactTitle}>Telefone</Text>
+        <Text style={styles.contactTitle}>Contatos</Text>
+        <Text style={styles.contactTitle}>Coordenação</Text>
         <TouchableOpacity onPress={() => handlePhonePress('81999999999')}>
           <Text style={styles.contactText}>+55 (81) 99999-9999</Text>
         </TouchableOpacity>
