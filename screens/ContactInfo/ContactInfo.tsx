@@ -1,87 +1,123 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Linking } from 'react-native';
-import { IconButton } from 'react-native-paper';
+import React from "react";
+import { View, Text, StyleSheet, TouchableOpacity, Linking, ScrollView } from "react-native";
 
-// Tipagem para o componente
-interface ContactInfoProps {}
+const ContactInfo: React.FC = () => {
+  const contacts = [
+    {
+      name: "Contato Mediotec",
+      phone: "(81)3233-8999",
+      email: "mediotec@edu.senac.com",
+      color: "#FFA5A5", // Cor para o círculo
+    },
+    {
+      name: "Coordenação",
+      phone: "(81)3233-8999",
+      email: "mediotec@edu.senac.com",
+      color: "#A5C8FF",
+    },
+    {
+      name: "Diretoria",
+      phone: "(81)3233-8999",
+      email: "mediotec@edu.senac.com",
+      color: "#FFD9A5",
+    },
+    {
+      name: "Atendimento",
+      phone: "(81)3233-8999",
+      email: "mediotec@edu.senac.com",
+      color: "#D8A5FF",
+    },
+  ];
 
-const ContactInfo: React.FC<ContactInfoProps> = () => {
-  // Função para chamar o número de telefone
   const handlePhonePress = (phoneNumber: string) => {
-    const phoneUrl = `tel:${phoneNumber}`;
-    Linking.openURL(phoneUrl).catch((err) => console.error('Erro ao tentar abrir o discador', err));
+    Linking.openURL(`tel:${phoneNumber}`).catch((err) =>
+      console.error("Erro ao tentar abrir o discador", err)
+    );
   };
 
-  // Função para abrir o e-mail no cliente de e-mail
   const handleEmailPress = (email: string) => {
-    const emailUrl = `mailto:${email}`;
-    Linking.openURL(emailUrl).catch((err) => console.error('Erro ao tentar abrir o cliente de e-mail', err));
+    Linking.openURL(`mailto:${email}`).catch((err) =>
+      console.error("Erro ao tentar abrir o cliente de e-mail", err)
+    );
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <IconButton
-          icon="arrow-left"
-          size={28}
-          onPress={() => {}}
-          style={styles.iconBack}
-          iconColor="#7326BF"
-        />
-        <Text style={styles.title}>Contatos</Text>
-      </View>
-
-      <View style={styles.contactContainer}>
-        <Text style={styles.contactTitle}>Telefone</Text>
-        <TouchableOpacity onPress={() => handlePhonePress('81999999999')}>
-          <Text style={styles.contactText}>+55 (81) 99999-9999</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.contactContainer}>
-        <Text style={styles.contactTitle}>E-mail</Text>
-        <TouchableOpacity onPress={() => handleEmailPress('contato@senac.com')}>
-          <Text style={styles.contactText}>contato@senac.com</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      {contacts.map((contact, index) => (
+        <View key={index} style={styles.contactContainer}>
+          <View style={styles.headerRow}>
+            <View
+              style={[styles.circle, { backgroundColor: contact.color }]}
+            >
+              <Text style={styles.circleText}>
+                {contact.name
+                  .split(" ")
+                  .map((word) => word[0])
+                  .join("")}
+              </Text>
+            </View>
+            <Text style={styles.contactName}>{contact.name}</Text>
+          </View>
+          <Text style={styles.contactLabel}>Telefone:</Text>
+          <TouchableOpacity onPress={() => handlePhonePress(contact.phone)}>
+            <Text style={styles.contactText}>{contact.phone}</Text>
+          </TouchableOpacity>
+          <Text style={styles.contactLabel}>Email:</Text>
+          <TouchableOpacity onPress={() => handleEmailPress(contact.email)}>
+            <Text style={styles.contactText}>{contact.email}</Text>
+          </TouchableOpacity>
+        </View>
+      ))}
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9F9F9',
+  scrollContainer: {
+    flexGrow: 1,
+    backgroundColor: "#F9F9F9",
     padding: 20,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  iconBack: {
-    backgroundColor: '#F2F2F2',
-    borderRadius: 30,
-    elevation: 5,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: '#7326BF',
-    marginLeft: 10,
-  },
   contactContainer: {
-    marginBottom: 20,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 15,
+    elevation: 3,
   },
-  contactTitle: {
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  circle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 10,
+  },
+  circleText: {
+    color: "#FFFFFF",
+    fontWeight: "600",
+    fontSize: 16,
+  },
+  contactName: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
+  },
+  contactLabel: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#555",
+    marginTop: 5,
   },
   contactText: {
     fontSize: 16,
-    color: '#007AFF',
-    marginTop: 5,
+    color: "#007AFF",
+    marginTop: 3,
   },
 });
 

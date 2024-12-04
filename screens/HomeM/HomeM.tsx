@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  ScrollView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -29,7 +30,6 @@ export default function HomeM() {
   const [error, setError] = useState<string | null>(null);
   const navigation = useNavigation();
 
-  // Função para buscar notificações
   const fetchNotifications = async () => {
     try {
       const token = await AsyncStorage.getItem('@user_token');
@@ -57,7 +57,6 @@ export default function HomeM() {
     }
   };
 
-  // Função para buscar dados do usuário
   const fetchUserData = async () => {
     try {
       const token = await AsyncStorage.getItem('@user_token');
@@ -104,10 +103,9 @@ export default function HomeM() {
   }
 
   return (
-    <View>
-      {/*  
-      <Text style={styles.welcomeText}>Bem-vindo, {userData.name || 'Usuário'}</Text> */}
-
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      
+      {/* Seção de notificações */}
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>Últimos avisos</Text>
@@ -137,11 +135,16 @@ export default function HomeM() {
 
       {/* Imagem dos alunos */}
       <Image source={fotoAlunos} style={styles.image} />
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+    backgroundColor: '#F9F9F9',
+    padding: 16,
+  },
   welcomeText: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -153,7 +156,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 10,
     padding: 16,
-    margin: 16,
+    marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,

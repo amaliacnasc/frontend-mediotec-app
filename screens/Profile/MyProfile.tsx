@@ -4,6 +4,7 @@ import { Avatar, Button, IconButton } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
+import { Linking } from "react-native";
 
 export default function MyProfile() {
   const [userData, setUserData] = React.useState({
@@ -50,6 +51,22 @@ export default function MyProfile() {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      // Remove os dados de autenticação do AsyncStorage
+      await AsyncStorage.removeItem("@user_token");
+      await AsyncStorage.removeItem("@user_id");
+
+      // Navega para a tela de login
+      navigation.navigate("Login");
+
+      Alert.alert("Sucesso", "Você foi deslogado com sucesso.");
+    } catch (error) {
+      console.error("Erro ao deslogar:", error);
+      Alert.alert("Erro", "Não foi possível deslogar.");
+    }
+  };
+
   React.useEffect(() => {
     fetchUserData();
   }, []);
@@ -73,9 +90,9 @@ export default function MyProfile() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <IconButton
-        icon="cog"
+        icon="logout"
         size={28}
-        onPress={() => {}}
+        onPress={handleLogout} // Chama a função de logout
         style={styles.iconSettings}
         iconColor="#7326BF"
       />
@@ -107,16 +124,18 @@ export default function MyProfile() {
           >
             Horários
           </Button>
+          
           <Button
             icon="credit-card-outline"
             mode="contained"
             buttonColor="#EBE1F7"
             style={styles.button}
-            onPress={() => navigation.navigate("PaymentsScreen")}
+            onPress={() => Linking.openURL("https://www.google.com")}
             labelStyle={styles.buttonLabel}
           >
             Pagamentos
           </Button>
+
           <Button
             icon="card-account-phone-outline"
             mode="contained"
